@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌸 Queue Dashboard — ระบบจัดการคิวลูกค้า</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Itim&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-icon">🌸</div>
+      <div>
+        <div class="header-title">Queue Dashboard</div>
+        <div class="header-subtitle">ระบบจัดการคิวลูกค้า</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="sync-indicator" id="syncIndicator">
+        <div class="sync-dot" id="syncDot"></div>
+        <span id="syncText">กำลังเชื่อมต่อ...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-content">
+
+    <!-- Stats Section -->
+    <p class="section-title">📊 ภาพรวมสถิติวันนี้</p>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon all">📋</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statAll">—</div>
+          <div class="stat-label">ลูกค้าทั้งหมด</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon pending">🎨</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statDesign">—</div>
+          <div class="stat-label">ออกแบบเสร็จ</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon done">✅</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statDone">—</div>
+          <div class="stat-label">จัดส่งเสร็จแล้ว</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon issue">📦</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statItems">—</div>
+          <div class="stat-label">สินค้าทั้งหมด (ชิ้น)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="ค้นหาชื่อลูกค้า, IG..."
+          oninput="applyFilter()"
+        />
+      </div>
+
+      <div class="filter-group">
+        <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
+        <button class="filter-btn" onclick="setFilter('ออกแบบเสร็จเรียบร้อย', this)">🎨 ออกแบบ</button>
+        <button class="filter-btn" onclick="setFilter('อัดรูปเสร็จเรียบร้อย', this)">🖨️ อัดรูป</button>
+        <button class="filter-btn" onclick="setFilter('จัดส่งเสร็จเรียบร้อย', this)">✅ จัดส่ง</button>
+      </div>
+
+      <button class="btn-refresh" id="refreshBtn" onclick="refreshData()" title="รีเฟรชข้อมูล">🔄</button>
+
+      <button class="btn-add" onclick="openModal()">
+        <span>＋</span> เพิ่มลูกค้า
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <div class="table-header">
+        <div class="table-title">🌸 รายการลูกค้า</div>
+        <div class="table-count" id="tableCount">0 รายการ</div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:60px">ลำดับ</th>
+              <th>ชื่อ - iG ลูกค้า</th>
+              <th>สถานะ</th>
+              <th>ประเภทการส่ง</th>
+              <th style="text-align:center">จำนวนสินค้า</th>
+              <th style="text-align:right">ราคา (บาท)</th>
+              <th>หมายเหตุ</th>
+              <th style="width:130px; text-align:center">ดำเนินการ</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="loading-row">
+              <td colspan="8">
+                <div class="loading-spinner"></div>
+                <div>กำลังโหลดข้อมูล...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== MONTHLY SUMMARY ===== -->
+    <p class="section-title" style="margin-top:36px">📅 สรุปรายเดือน</p>
+    <div class="monthly-toolbar">
+      <div class="year-selector">
+        <button class="year-btn" onclick="changeYear(-1)">‹</button>
+        <span id="selectedYear" class="year-display">2568</span>
+        <button class="year-btn" onclick="changeYear(1)">›</button>
+      </div>
+    </div>
+    <div class="monthly-grid" id="monthlyGrid">
+      <!-- filled by JS -->
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    🌸 Queue Dashboard &nbsp;|&nbsp; อัปเดตอัตโนมัติทุก 10 วินาที
+    &nbsp;|&nbsp; <span id="lastUpdated">—</span>
+  </footer>
+
+</div>
+
+<!-- ===== MODAL: เพิ่ม/แก้ไข ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span id="modalIcon">🌸</span>
+        <span id="modalTitle">เพิ่มลูกค้าใหม่</span>
+      </div>
+      <button class="btn-modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editRowIndex" value="" />
+      <input type="hidden" id="fieldCreatedAt" value="" />
+
+      <div class="form-group">
+        <label class="form-label">👤 ชื่อ - iG ลูกค้า <span style="color:var(--pink-500)">*</span></label>
+        <input type="text" class="form-input" id="fieldName" placeholder="ชื่อลูกค้า หรือ IG:" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">📦 สถานะ</label>
+          <select class="form-select" id="fieldStatus">
+            <option value="ออกแบบเสร็จเรียบร้อย">🎨 ออกแบบเสร็จเรียบร้อย</option>
+            <option value="อัดรูปเสร็จเรียบร้อย">🖨️ อัดรูปเสร็จเรียบร้อย</option>
+            <option value="จัดส่งเสร็จเรียบร้อย">✅ จัดส่งเสร็จเรียบร้อย</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">🚚 ประเภทการส่ง</label>
+          <select class="form-select" id="fieldDelivery">
+            <option value="มารับที่บ้าน">🏠 มารับที่บ้าน</option>
+            <option value="ส่งไรเดอร์">🛵 ส่งไรเดอร์</option>
+            <option value="ส่งไปรษณีย์">📮 ส่งไปรษณีย์</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">🔢 จำนวนสินค้า (ชิ้น)</label>
+          <input type="number" class="form-input" id="fieldQty" placeholder="0" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">💰 ราคาที่ลูกค้าจ่าย (บาท)</label>
+          <input type="number" class="form-input" id="fieldPrice" placeholder="0.00" min="0" step="0.01" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📝 หมายเหตุ</label>
+        <textarea class="form-textarea" id="fieldNote" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-save" id="btnSave" onclick="saveCustomer()">
+        <span>💾</span> บันทึก
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIRM DELETE ===== -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">ยืนยันการลบ?</div>
+    <div class="confirm-text">ข้อมูลลูกค้านี้จะถูกลบออกจากระบบถาวร<br>และไม่สามารถกู้คืนได้</div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">ยกเลิก</button>
+      <button class="btn-confirm-delete" id="btnConfirmDelete" onclick="executeDelete()">ลบเลย</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
