@@ -321,6 +321,27 @@ body::after {
   flex-wrap: wrap;
 }
 
+/* toolbar-row-2: filter + refresh อยู่แถวเดียวกัน */
+.toolbar-row-2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.toolbar-row-2 .filter-group {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.toolbar-row-2 .filter-group::-webkit-scrollbar {
+  display: none;
+}
+
 .search-box {
   flex: 1;
   min-width: 240px;
@@ -1379,34 +1400,36 @@ tbody tr {
     font-size: 11px;
   }
 
-  /* Toolbar */
+  /* Toolbar — จัดใหม่เป็น 3 แถว */
   .toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
   .search-box {
+    width: 100%;
     min-width: unset;
   }
-  .filter-group {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  /* แถว 2: toolbar-row-2 (filter + refresh) */
+  .toolbar-row-2 {
+    width: 100%;
+    flex: unset;
   }
-  .filter-group::-webkit-scrollbar {
-    display: none;
+  .toolbar-row-2 .filter-group {
+    flex: 1;
   }
   .filter-btn {
-    padding: 7px 14px;
+    padding: 7px 12px;
     font-size: 12px;
   }
+  .btn-refresh {
+    flex-shrink: 0;
+  }
+  /* แถว 3: ปุ่ม เพิ่มลูกค้า เต็มความกว้าง */
   .btn-add {
     width: 100%;
     justify-content: center;
     padding: 12px;
-  }
-  .btn-refresh {
-    align-self: flex-end;
   }
 
   /* Table — ซ่อนคอลัมน์ไม่จำเป็น */
