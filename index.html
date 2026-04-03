@@ -35,6 +35,8 @@
 
     <!-- Stats Section -->
     <p class="section-title">📊 ภาพรวมสถิติวันนี้</p>
+    
+    <!-- Main Stats Grid (6 cards) -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon all">📋</div>
@@ -44,10 +46,31 @@
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon pending">🎨</div>
+        <div class="stat-icon queue">📥</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statQueue">—</div>
+          <div class="stat-label">รับคิวแล้ว</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon design">🎨</div>
         <div class="stat-info">
           <div class="stat-number" id="statDesign">—</div>
           <div class="stat-label">ออกแบบเสร็จ</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon print">🖨️</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statPrint">—</div>
+          <div class="stat-label">อัดรูปเสร็จ</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon progress">⚙️</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statProgress">—</div>
+          <div class="stat-label">งานที่กำลังทำ</div>
         </div>
       </div>
       <div class="stat-card">
@@ -58,13 +81,21 @@
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon issue">📦</div>
+        <div class="stat-icon progress">⏳</div>
         <div class="stat-info">
-          <div class="stat-number" id="statItems">—</div>
-          <div class="stat-label">สินค้าทั้งหมด (ชิ้น)</div>
+          <div class="stat-number" id="statExpected" style="font-size:18px">—</div>
+          <div class="stat-label">รายได้ที่รอรับ</div>
         </div>
       </div>
+      <div class="stat-card">
+        <div class="stat-icon done">💰</div>
+        <div class="stat-info">
+          <div class="stat-number" id="statEarned" style="font-size:18px">—</div>
+          <div class="stat-label">รายได้จริง</div>
+      </div>
+      </div>
     </div>
+
 
     <!-- Toolbar -->
     <div class="toolbar">
@@ -80,6 +111,7 @@
 
       <div class="filter-group">
         <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
+        <button class="filter-btn" onclick="setFilter('รับคิวเรียบร้อย', this)">📥 รับคิว</button>
         <button class="filter-btn" onclick="setFilter('ออกแบบเสร็จเรียบร้อย', this)">🎨 ออกแบบ</button>
         <button class="filter-btn" onclick="setFilter('อัดรูปเสร็จเรียบร้อย', this)">🖨️ อัดรูป</button>
         <button class="filter-btn" onclick="setFilter('จัดส่งเสร็จเรียบร้อย', this)">✅ จัดส่ง</button>
@@ -108,13 +140,14 @@
               <th>ประเภทการส่ง</th>
               <th style="text-align:center">จำนวนสินค้า</th>
               <th style="text-align:right">ราคา (บาท)</th>
+              <th>กำหนดส่ง</th>
               <th>หมายเหตุ</th>
               <th style="width:130px; text-align:center">ดำเนินการ</th>
             </tr>
           </thead>
           <tbody id="tableBody">
             <tr class="loading-row">
-              <td colspan="8">
+              <td colspan="9">
                 <div class="loading-spinner"></div>
                 <div>กำลังโหลดข้อมูล...</div>
               </td>
@@ -133,9 +166,7 @@
         <button class="year-btn" onclick="changeYear(1)">›</button>
       </div>
     </div>
-    <div class="monthly-grid" id="monthlyGrid">
-      <!-- filled by JS -->
-    </div>
+    <div class="monthly-grid" id="monthlyGrid"></div>
 
   </main>
 
@@ -169,6 +200,7 @@
         <div class="form-group">
           <label class="form-label">📦 สถานะ</label>
           <select class="form-select" id="fieldStatus">
+            <option value="รับคิวเรียบร้อย">📥 รับคิวเรียบร้อย</option>
             <option value="ออกแบบเสร็จเรียบร้อย">🎨 ออกแบบเสร็จเรียบร้อย</option>
             <option value="อัดรูปเสร็จเรียบร้อย">🖨️ อัดรูปเสร็จเรียบร้อย</option>
             <option value="จัดส่งเสร็จเรียบร้อย">✅ จัดส่งเสร็จเรียบร้อย</option>
@@ -193,6 +225,21 @@
           <label class="form-label">💰 ราคาที่ลูกค้าจ่าย (บาท)</label>
           <input type="number" class="form-input" id="fieldPrice" placeholder="0.00" min="0" step="0.01" />
         </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📅 กำหนดส่ง</label>
+        <select class="form-select" id="fieldDueDate">
+          <option value="">— ไม่ระบุ —</option>
+          <option value="ส่งก่อนวันจันทร์">ส่งก่อนวันจันทร์</option>
+          <option value="ส่งก่อนวันอังคาร">ส่งก่อนวันอังคาร</option>
+          <option value="ส่งก่อนวันพุธ">ส่งก่อนวันพุธ</option>
+          <option value="ส่งก่อนวันพฤหัสบดี">ส่งก่อนวันพฤหัสบดี</option>
+          <option value="ส่งก่อนวันศุกร์">ส่งก่อนวันศุกร์</option>
+          <option value="ส่งวันเสาร์">ส่งวันเสาร์</option>
+          <option value="ส่งวันอาทิตย์">ส่งวันอาทิตย์</option>
+          <option value="ด่วน! ส่งวันนี้">🚨 ด่วน! ส่งวันนี้</option>
+        </select>
       </div>
 
       <div class="form-group">
@@ -222,7 +269,7 @@
   </div>
 </div>
 
-<!-- ===== TOAST CONTAINER ===== -->
+<!-- ===== TOAST ===== -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="script.js"></script>
