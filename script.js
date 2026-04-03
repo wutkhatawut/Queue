@@ -1,7 +1,7 @@
 /* =====================================================
-   CONFIG — แทนที่ URL ด้านล่างด้วย Google Apps Script Web App URL ของคุณ
+   CONFIG
    ===================================================== */
-const API_URL = "https://script.google.com/macros/s/AKfycbwUqPk0-tdH3zZJFxtAmaCFPp8pOOrLWBA3j3XvYq9vBEZOwHkgYAepFqosFUlWIOdaAw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzaF-jeGL5EEbk0ZahQ91ZJnxTayfsaV-sW9mcC9ouy2U4TIxex_sEwXCJdUqkeoM_y2A/exec";
 
 /* =====================================================
    STATE
@@ -10,10 +10,10 @@ let allData      = [];
 let filterStatus = 'all';
 let deleteTarget = null;
 let syncInterval = null;
-let selectedYear = new Date().getFullYear() + 543; // พ.ศ.
+let selectedYear = new Date().getFullYear() + 543;
 
 /* =====================================================
-   HELPER — แปลง object → query string
+   HELPER
    ===================================================== */
 function toQuery(params) {
   return Object.entries(params)
@@ -31,14 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* =====================================================
-   FETCH DATA (GET)
+   FETCH DATA
    ===================================================== */
 async function fetchData() {
   setSyncStatus('loading');
   try {
     const res  = await fetch(`${API_URL}?action=getAll`, { cache: 'no-store' });
     const json = await res.json();
-
     if (json.status === 'success') {
       allData = json.data || [];
       renderTable();
@@ -58,16 +57,24 @@ async function fetchData() {
 }
 
 /* =====================================================
-   RENDER TABLE
+   RENDER TABLE — แบ่งกลุ่มตามสถานะ
    ===================================================== */
+
+// ลำดับ section และ label
+const STATUS_SECTIONS = [
+  { key: 'รับคิวเรียบร้อย',        icon: '📥', label: 'รับคิวเรียบร้อย — ยังไม่ได้เริ่ม',  colorClass: 'section-queue'  },
+  { key: 'ออกแบบเสร็จเรียบร้อย',  icon: '🎨', label: 'กำลังดำเนินการ — ออกแบบเสร็จแล้ว', colorClass: 'section-design' },
+  { key: 'อัดรูปเสร็จเรียบร้อย',  icon: '🖨️', label: 'กำลังดำเนินการ — อัดรูปเสร็จแล้ว', colorClass: 'section-print'  },
+  { key: 'จัดส่งเสร็จเรียบร้อย',  icon: '✅', label: 'เสร็จสิ้น — จัดส่งเรียบร้อยแล้ว',  colorClass: 'section-done'   },
+];
+
 function renderTable() {
-  const search  = document.getElementById('searchInput').value.toLowerCase().trim();
-  const tbody   = document.getElementById('tableBody');
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  const tbody  = document.getElementById('tableBody');
 
   let filtered = allData.filter(row => {
     const matchFilter = filterStatus === 'all' || row.status === filterStatus;
-    const matchSearch = !search ||
-      (row.name  || '').toLowerCase().includes(search);
+    const matchSearch = !search || (row.name || '').toLowerCase().includes(search);
     return matchFilter && matchSearch;
   });
 
@@ -76,7 +83,7 @@ function renderTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8">
+        <td colspan="9">
           <div class="empty-state">
             <div class="empty-icon">🌸</div>
             <div class="empty-text">ไม่พบข้อมูลลูกค้า</div>
@@ -87,15 +94,56 @@ function renderTable() {
     return;
   }
 
-  tbody.innerHTML = filtered.map((row, i) => `
+  // ถ้ากรองอยู่ ให้แสดงแบบปกติ (ไม่แบ่ง section)
+  if (filterStatus !== 'all' || search) {
+    tbody.innerHTML = filtered.map((row, i) => renderRow(row, i + 1)).join('');
+    return;
+  }
+
+  // แสดงแบบแบ่ง section ตามสถานะ
+  let html = '';
+  let globalIdx = 1;
+
+  STATUS_SECTIONS.forEach(section => {
+    const rows = filtered.filter(r => r.status === section.key);
+    if (rows.length === 0) return;
+
+    html += `
+      <tr class="section-header-row ${section.colorClass}">
+        <td colspan="9">
+          <div class="section-header-content">
+            <span class="section-header-icon">${section.icon}</span>
+            <span class="section-header-label">${section.label}</span>
+            <span class="section-header-count">${rows.length} รายการ</span>
+          </div>
+        </td>
+      </tr>`;
+
+    rows.forEach(row => {
+      html += renderRow(row, globalIdx++);
+    });
+  });
+
+  tbody.innerHTML = html;
+}
+
+function renderRow(row, idx) {
+  // FIX: Normalize dueDate — handles snake_case, lowercase, or camelCase from API
+  const dueDateValue = row.dueDate || row.due_date || row.duedate || row.DueDate || '';
+  const dueLabel = dueDateValue
+    ? `<span class="due-tag">📅 ${esc(dueDateValue)}</span>`
+    : '<span style="color:var(--text-muted);font-size:12px">—</span>';
+
+  return `
     <tr>
-      <td><span class="queue-number">#${i + 1}</span></td>
+      <td><span class="queue-number">#${idx}</span></td>
       <td><div class="customer-name">${esc(row.name || '—')}</div></td>
       <td>${renderBadge(row.status)}</td>
       <td><span class="delivery-tag">${deliveryIcon(row.delivery)} ${esc(row.delivery || '—')}</span></td>
       <td style="text-align:center;font-weight:600;color:var(--text-dark)">${row.qty ? Number(row.qty).toLocaleString('th-TH') + ' ชิ้น' : '—'}</td>
       <td style="text-align:right;font-weight:600;color:var(--pink-600)">${row.price ? '฿' + Number(row.price).toLocaleString('th-TH', {minimumFractionDigits:2}) : '—'}</td>
-      <td style="font-size:13px;color:var(--text-medium);max-width:160px;">${esc(row.note || '—')}</td>
+      <td>${dueLabel}</td>
+      <td style="font-size:13px;color:var(--text-medium);max-width:140px;">${esc(row.note || '—')}</td>
       <td>
         <div class="action-group" style="justify-content:center">
           <button class="btn-action btn-edit"   onclick="openEditModal(${row.rowIndex})" title="แก้ไข">✏️</button>
@@ -103,8 +151,7 @@ function renderTable() {
           <button class="btn-action btn-delete" onclick="confirmDelete(${row.rowIndex})" title="ลบ">🗑️</button>
         </div>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
 }
 
 /* =====================================================
@@ -112,11 +159,12 @@ function renderTable() {
    ===================================================== */
 function renderBadge(status) {
   const map = {
-    'ออกแบบเสร็จเรียบร้อย': ['badge-design',  '🎨 ออกแบบเสร็จ'],
-    'อัดรูปเสร็จเรียบร้อย':  ['badge-print',   '🖨️ อัดรูปเสร็จ'],
-    'จัดส่งเสร็จเรียบร้อย':  ['badge-done',    '✅ จัดส่งเสร็จ'],
+    'รับคิวเรียบร้อย':           ['badge-queue',  '📥 รับคิวแล้ว'],
+    'ออกแบบเสร็จเรียบร้อย':     ['badge-design', '🎨 ออกแบบเสร็จ'],
+    'อัดรูปเสร็จเรียบร้อย':     ['badge-print',  '🖨️ อัดรูปเสร็จ'],
+    'จัดส่งเสร็จเรียบร้อย':     ['badge-done',   '✅ จัดส่งเสร็จ'],
   };
-  const [cls, label] = map[status] || ['badge-design', status || '—'];
+  const [cls, label] = map[status] || ['badge-queue', status || '—'];
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
@@ -134,16 +182,37 @@ function esc(str) {
 }
 
 /* =====================================================
-   STATS
+   STATS — อัปเดตการ์ดเท่านั้น (ไม่มี breakdown pills)
    ===================================================== */
 function updateStats() {
-  document.getElementById('statAll').textContent    = allData.length;
-  document.getElementById('statDesign').textContent =
-    allData.filter(r => r.status === 'ออกแบบเสร็จเรียบร้อย').length;
-  document.getElementById('statDone').textContent   =
-    allData.filter(r => r.status === 'จัดส่งเสร็จเรียบร้อย').length;
-  const totalItems = allData.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
-  document.getElementById('statItems').textContent  = totalItems.toLocaleString('th-TH');
+  const queueCount  = allData.filter(r => r.status === 'รับคิวเรียบร้อย').length;
+  const designCount = allData.filter(r => r.status === 'ออกแบบเสร็จเรียบร้อย').length;
+  const printCount  = allData.filter(r => r.status === 'อัดรูปเสร็จเรียบร้อย').length;
+  const doneCount   = allData.filter(r => r.status === 'จัดส่งเสร็จเรียบร้อย').length;
+  const inProgress  = designCount + printCount;
+
+  // ✅ รายได้จริง = จัดส่งเสร็จเรียบร้อยเท่านั้น
+  const earnedRevenue = allData
+    .filter(r => r.status === 'จัดส่งเสร็จเรียบร้อย')
+    .reduce((sum, r) => sum + (Number(r.price) || 0), 0);
+
+  // ✅ รายได้ที่คาดว่าจะได้ = ยังไม่จัดส่ง (3 สถานะแรก)
+  const expectedRevenue = allData
+    .filter(r => r.status !== 'จัดส่งเสร็จเรียบร้อย')
+    .reduce((sum, r) => sum + (Number(r.price) || 0), 0);
+
+  document.getElementById('statAll').textContent      = allData.length;
+  document.getElementById('statProgress').textContent = inProgress;
+  document.getElementById('statQueue').textContent    = queueCount;
+  document.getElementById('statDesign').textContent   = designCount;
+  document.getElementById('statPrint').textContent    = printCount;
+  document.getElementById('statDone').textContent     = doneCount;
+
+  // ✅ อัปเดต stat รายได้ทั้งสอง
+  document.getElementById('statEarned').textContent   =
+    '฿' + earnedRevenue.toLocaleString('th-TH', {minimumFractionDigits: 0});
+  document.getElementById('statExpected').textContent =
+    '฿' + expectedRevenue.toLocaleString('th-TH', {minimumFractionDigits: 0});
 }
 
 /* =====================================================
@@ -163,14 +232,11 @@ function changeYear(delta) {
 
 function renderMonthly() {
   const grid = document.getElementById('monthlyGrid');
-
-  // group by year/month using createdAt field (ISO string) or fallback
-  // key: "YYYY-MM" in AD
   const buckets = {};
   for (let m = 1; m <= 12; m++) {
     const adYear = selectedYear - 543;
     const key = `${adYear}-${String(m).padStart(2,'0')}`;
-    buckets[key] = { items: 0, revenue: 0, orders: 0 };
+    buckets[key] = { items: 0, earned: 0, expected: 0, orders: 0 };
   }
 
   allData.forEach(row => {
@@ -178,17 +244,20 @@ function renderMonthly() {
     const d = new Date(row.createdAt);
     if (isNaN(d)) return;
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    if (buckets[key]) {
-      buckets[key].orders++;
-      buckets[key].items   += Number(row.qty)   || 0;
-      buckets[key].revenue += Number(row.price) || 0;
+    if (!buckets[key]) return;
+    buckets[key].orders++;
+    buckets[key].items += Number(row.qty) || 0;
+
+    if (row.status === 'จัดส่งเสร็จเรียบร้อย') {
+      buckets[key].earned   += Number(row.price) || 0;
+    } else {
+      buckets[key].expected += Number(row.price) || 0;
     }
   });
 
-  const adYear = selectedYear - 543;
   const cards = Object.entries(buckets).map(([key, data], idx) => {
     const monthName = MONTH_NAMES_TH[idx];
-    const hasData = data.orders > 0;
+    const hasData   = data.orders > 0;
     return `
       <div class="month-card ${hasData ? 'has-data' : ''}">
         <div class="month-name">${monthName}</div>
@@ -202,26 +271,32 @@ function renderMonthly() {
             </div>
           </div>
           <div class="month-stat">
-            <span class="month-stat-icon">💰</span>
+            <span class="month-stat-icon">⏳</span>
             <div>
-              <div class="month-stat-num revenue">฿${data.revenue.toLocaleString('th-TH', {minimumFractionDigits:0})}</div>
-              <div class="month-stat-label">รายได้</div>
+              <div class="month-stat-num" style="color:var(--text-medium)">฿${data.expected.toLocaleString('th-TH')}</div>
+              <div class="month-stat-label">รอรับ</div>
+            </div>
+          </div>
+          <div class="month-stat">
+            <span class="month-stat-icon">✅</span>
+            <div>
+              <div class="month-stat-num revenue">฿${data.earned.toLocaleString('th-TH')}</div>
+              <div class="month-stat-label">รายได้จริง</div>
             </div>
           </div>
         </div>
         <div class="month-orders">${data.orders} ออเดอร์</div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 
-  // Yearly total
-  const totalItems   = Object.values(buckets).reduce((s,b) => s+b.items, 0);
-  const totalRevenue = Object.values(buckets).reduce((s,b) => s+b.revenue, 0);
-  const totalOrders  = Object.values(buckets).reduce((s,b) => s+b.orders, 0);
+  const totalEarned   = Object.values(buckets).reduce((s,b) => s + b.earned,   0);
+  const totalExpected = Object.values(buckets).reduce((s,b) => s + b.expected, 0);
+  const totalItems    = Object.values(buckets).reduce((s,b) => s + b.items,    0);
+  const totalOrders   = Object.values(buckets).reduce((s,b) => s + b.orders,   0);
 
   grid.innerHTML = cards + `
     <div class="month-card yearly-total">
-      <div class="month-name">รวมทั้งปี</div>
+      <div class="month-name">🌸 รวมทั้งปี</div>
       <div class="month-year">${selectedYear}</div>
       <div class="month-stats">
         <div class="month-stat">
@@ -232,16 +307,22 @@ function renderMonthly() {
           </div>
         </div>
         <div class="month-stat">
-          <span class="month-stat-icon">💰</span>
+          <span class="month-stat-icon">⏳</span>
           <div>
-            <div class="month-stat-num revenue">฿${totalRevenue.toLocaleString('th-TH', {minimumFractionDigits:0})}</div>
-            <div class="month-stat-label">รายได้</div>
+            <div class="month-stat-num" style="color:var(--text-medium)">฿${totalExpected.toLocaleString('th-TH')}</div>
+            <div class="month-stat-label">รอรับ</div>
+          </div>
+        </div>
+        <div class="month-stat">
+          <span class="month-stat-icon">✅</span>
+          <div>
+            <div class="month-stat-num revenue">฿${totalEarned.toLocaleString('th-TH')}</div>
+            <div class="month-stat-label">รายได้จริง</div>
           </div>
         </div>
       </div>
       <div class="month-orders">${totalOrders} ออเดอร์</div>
-    </div>
-  `;
+    </div>`;
 }
 
 /* =====================================================
@@ -277,10 +358,11 @@ function openModal() {
   document.getElementById('editRowIndex').value       = '';
   document.getElementById('fieldCreatedAt').value     = new Date().toISOString();
   document.getElementById('fieldName').value          = '';
-  document.getElementById('fieldStatus').value        = 'ออกแบบเสร็จเรียบร้อย';
+  document.getElementById('fieldStatus').value        = 'รับคิวเรียบร้อย';
   document.getElementById('fieldDelivery').value      = 'ส่งไปรษณีย์';
   document.getElementById('fieldQty').value           = '';
   document.getElementById('fieldPrice').value         = '';
+  document.getElementById('fieldDueDate').value       = '';
   document.getElementById('fieldNote').value          = '';
   document.getElementById('modalOverlay').classList.add('open');
   setTimeout(() => document.getElementById('fieldName').focus(), 300);
@@ -291,15 +373,19 @@ function openEditModal(rowIndex) {
   const row = allData.find(r => r.rowIndex === rowIndex);
   if (!row) return;
 
+  // FIX: Same normalization when populating the edit form
+  const dueDateValue = row.dueDate || row.due_date || row.duedate || row.DueDate || '';
+
   document.getElementById('modalIcon').textContent    = '✏️';
   document.getElementById('modalTitle').textContent   = 'แก้ไขข้อมูลลูกค้า';
   document.getElementById('editRowIndex').value       = rowIndex;
   document.getElementById('fieldCreatedAt').value     = row.createdAt || new Date().toISOString();
   document.getElementById('fieldName').value          = row.name     || '';
-  document.getElementById('fieldStatus').value        = row.status   || 'ออกแบบเสร็จเรียบร้อย';
+  document.getElementById('fieldStatus').value        = row.status   || 'รับคิวเรียบร้อย';
   document.getElementById('fieldDelivery').value      = row.delivery || 'ส่งไปรษณีย์';
   document.getElementById('fieldQty').value           = row.qty      || '';
   document.getElementById('fieldPrice').value         = row.price    || '';
+  document.getElementById('fieldDueDate').value       = dueDateValue; // ✅ normalized
   document.getElementById('fieldNote').value          = row.note     || '';
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -322,6 +408,7 @@ async function saveCustomer() {
   const delivery  = document.getElementById('fieldDelivery').value;
   const qty       = document.getElementById('fieldQty').value.trim();
   const price     = document.getElementById('fieldPrice').value.trim();
+  const dueDate   = document.getElementById('fieldDueDate').value.trim();
   const note      = document.getElementById('fieldNote').value.trim();
   const rowIndex  = document.getElementById('editRowIndex').value;
   const createdAt = document.getElementById('fieldCreatedAt').value || new Date().toISOString();
@@ -338,18 +425,16 @@ async function saveCustomer() {
 
   const params = {
     action: rowIndex ? 'update' : 'add',
-    rowIndex, name, status, delivery, qty, price, note, createdAt
+    rowIndex, name, status, delivery, qty, price, dueDate, note, createdAt
   };
 
   try {
     const res  = await fetch(`${API_URL}?${toQuery(params)}`, { cache: 'no-store' });
     const json = await res.json();
     if (json.status !== 'success') throw new Error(json.message);
-
     closeModal();
     showToast('success', '✅ บันทึกสำเร็จ', rowIndex ? 'อัปเดตข้อมูลลูกค้าเรียบร้อย' : 'เพิ่มลูกค้าใหม่เรียบร้อย');
     fetchData();
-
   } catch (err) {
     showToast('error', '❌ เกิดข้อผิดพลาด', err.message || 'ไม่สามารถบันทึกข้อมูลได้');
     console.error(err);
@@ -366,7 +451,7 @@ async function cycleStatus(rowIndex) {
   const row = allData.find(r => r.rowIndex === rowIndex);
   if (!row) return;
 
-  const order = ['ออกแบบเสร็จเรียบร้อย', 'อัดรูปเสร็จเรียบร้อย', 'จัดส่งเสร็จเรียบร้อย'];
+  const order = ['รับคิวเรียบร้อย', 'ออกแบบเสร็จเรียบร้อย', 'อัดรูปเสร็จเรียบร้อย', 'จัดส่งเสร็จเรียบร้อย'];
   const next  = order[(order.indexOf(row.status) + 1) % order.length];
   row.status  = next;
   renderTable();
@@ -398,7 +483,6 @@ async function executeDelete() {
   if (!deleteTarget) return;
   const rowIndex = deleteTarget;
   closeConfirm();
-
   try {
     const res  = await fetch(`${API_URL}?${toQuery({ action: 'delete', rowIndex })}`, { cache: 'no-store' });
     const json = await res.json();
@@ -417,7 +501,6 @@ function setSyncStatus(state) {
   const dot  = document.getElementById('syncDot');
   const text = document.getElementById('syncText');
   dot.className = 'sync-dot';
-
   if (state === 'connected') {
     dot.classList.add('connected');
     text.textContent = 'เชื่อมต่อแล้ว';
@@ -436,7 +519,6 @@ function showToast(type, title, msg) {
   const container = document.getElementById('toastContainer');
   const id    = 'toast-' + Date.now();
   const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.id = id;
@@ -446,9 +528,7 @@ function showToast(type, title, msg) {
       <div class="toast-title">${title}</div>
       ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
     </div>
-    <button class="toast-close" onclick="removeToast('${id}')">✕</button>
-  `;
-
+    <button class="toast-close" onclick="removeToast('${id}')">✕</button>`;
   container.appendChild(toast);
   setTimeout(() => removeToast(id), 4000);
 }
@@ -464,13 +544,8 @@ function removeToast(id) {
    KEYBOARD SHORTCUTS
    ===================================================== */
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeModal();
-    closeConfirm();
-  }
+  if (e.key === 'Escape') { closeModal(); closeConfirm(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    if (document.getElementById('modalOverlay').classList.contains('open')) {
-      saveCustomer();
-    }
+    if (document.getElementById('modalOverlay').classList.contains('open')) saveCustomer();
   }
 });
