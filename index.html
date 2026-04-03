@@ -35,8 +35,8 @@
 
     <!-- Stats Section -->
     <p class="section-title">📊 ภาพรวมสถิติวันนี้</p>
-    
-    <!-- Main Stats Grid (6 cards) -->
+
+    <!-- Main Stats Grid (8 cards) -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon all">📋</div>
@@ -92,13 +92,14 @@
         <div class="stat-info">
           <div class="stat-number" id="statEarned" style="font-size:18px">—</div>
           <div class="stat-label">รายได้จริง</div>
-      </div>
+        </div>
       </div>
     </div>
 
-
     <!-- Toolbar -->
     <div class="toolbar">
+
+      <!-- แถว 1: Search -->
       <div class="search-box">
         <span class="search-icon">🔍</span>
         <input
@@ -109,19 +110,23 @@
         />
       </div>
 
-      <div class="filter-group">
-        <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
-        <button class="filter-btn" onclick="setFilter('รับคิวเรียบร้อย', this)">📥 รับคิว</button>
-        <button class="filter-btn" onclick="setFilter('ออกแบบเสร็จเรียบร้อย', this)">🎨 ออกแบบ</button>
-        <button class="filter-btn" onclick="setFilter('อัดรูปเสร็จเรียบร้อย', this)">🖨️ อัดรูป</button>
-        <button class="filter-btn" onclick="setFilter('จัดส่งเสร็จเรียบร้อย', this)">✅ จัดส่ง</button>
+      <!-- แถว 2: Filter + Refresh อยู่แถวเดียวกัน -->
+      <div class="toolbar-row-2">
+        <div class="filter-group">
+          <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
+          <button class="filter-btn" onclick="setFilter('รับคิวเรียบร้อย', this)">📥 รับคิว</button>
+          <button class="filter-btn" onclick="setFilter('ออกแบบเสร็จเรียบร้อย', this)">🎨 ออกแบบ</button>
+          <button class="filter-btn" onclick="setFilter('อัดรูปเสร็จเรียบร้อย', this)">🖨️ อัดรูป</button>
+          <button class="filter-btn" onclick="setFilter('จัดส่งเสร็จเรียบร้อย', this)">✅ จัดส่ง</button>
+        </div>
+        <button class="btn-refresh" id="refreshBtn" onclick="refreshData()" title="รีเฟรชข้อมูล">🔄</button>
       </div>
 
-      <button class="btn-refresh" id="refreshBtn" onclick="refreshData()" title="รีเฟรชข้อมูล">🔄</button>
-
+      <!-- แถว 3: ปุ่ม เพิ่มลูกค้า -->
       <button class="btn-add" onclick="openModal()">
         <span>＋</span> เพิ่มลูกค้า
       </button>
+
     </div>
 
     <!-- Table -->
