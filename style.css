@@ -508,6 +508,12 @@ body::after {
   padding: 3px 12px;
 }
 
+.table-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 530px; /* ~10 แถว × 53px */
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -524,6 +530,9 @@ body::after {
   border-bottom: 1.5px solid var(--border-light);
   background: var(--surface-2);
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .data-table thead th:nth-child(1) { width: 60px; }
