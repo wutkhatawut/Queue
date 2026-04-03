@@ -124,6 +124,7 @@ body::after {
   justify-content: center;
   font-size: 20px;
   box-shadow: 0 4px 12px rgba(244, 91, 142, 0.3);
+  flex-shrink: 0;
 }
 
 .header-title {
@@ -165,6 +166,7 @@ body::after {
   border-radius: 50%;
   background: var(--pink-400);
   animation: pulse-dot 1.5s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 .sync-dot.connected {
@@ -211,12 +213,13 @@ body::after {
   height: 18px;
   background: linear-gradient(to bottom, var(--pink-300), var(--pink-500));
   border-radius: 2px;
+  flex-shrink: 0;
 }
 
-/* ===== STATS GRID — 6 Cards ===== */
+/* ===== STATS GRID ===== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 14px;
   margin-bottom: 18px;
 }
@@ -433,6 +436,7 @@ body::after {
   cursor: pointer;
   transition: var(--transition);
   color: var(--text-medium);
+  flex-shrink: 0;
 }
 
 .btn-refresh:hover {
@@ -501,16 +505,15 @@ body::after {
   white-space: nowrap;
 }
 
-/* 🔧 ปรับ width ของ column ต่างๆ */
-.data-table thead th:nth-child(1) { width: 60px; }      /* ลำดับ */
-.data-table thead th:nth-child(2) { width: auto; }      /* ชื่อ - IG */
-.data-table thead th:nth-child(3) { width: 100px; }     /* สถานะ */
-.data-table thead th:nth-child(4) { width: 110px; }     /* ประเภทการส่ง */
-.data-table thead th:nth-child(5) { width: 100px; }     /* จำนวนสินค้า */
-.data-table thead th:nth-child(6) { width: 100px; }     /* ราคา */
-.data-table thead th:nth-child(7) { width: 110px; }     /* 🔧 กำหนดส่ง - แสดงชัดเจน */
-.data-table thead th:nth-child(8) { width: 140px; }     /* หมายเหตุ */
-.data-table thead th:nth-child(9) { width: 130px; }     /* ดำเนินการ */
+.data-table thead th:nth-child(1) { width: 60px; }
+.data-table thead th:nth-child(2) { width: auto; }
+.data-table thead th:nth-child(3) { width: 100px; }
+.data-table thead th:nth-child(4) { width: 110px; }
+.data-table thead th:nth-child(5) { width: 100px; }
+.data-table thead th:nth-child(6) { width: 100px; }
+.data-table thead th:nth-child(7) { width: 110px; }
+.data-table thead th:nth-child(8) { width: 140px; }
+.data-table thead th:nth-child(9) { width: 130px; }
 
 .data-table tbody tr {
   border-bottom: 1px solid var(--border-light);
@@ -569,28 +572,16 @@ body::after {
   border-radius: 50%;
 }
 
-.badge-queue {
-  background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-  color: #0369a1;
-}
+.badge-queue  { background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0369a1; }
 .badge-queue::before { background: #0ea5e9; }
 
-.badge-design {
-  background: linear-gradient(135deg, #fce4ec, #f8bbd9);
-  color: var(--pink-600);
-}
+.badge-design { background: linear-gradient(135deg, #fce4ec, #f8bbd9); color: var(--pink-600); }
 .badge-design::before { background: var(--pink-500); }
 
-.badge-print {
-  background: #fff3e0;
-  color: #e65100;
-}
+.badge-print  { background: #fff3e0; color: #e65100; }
 .badge-print::before { background: #ff6f00; }
 
-.badge-done {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
+.badge-done   { background: #e8f5e9; color: #2e7d32; }
 .badge-done::before { background: #43a047; }
 
 /* ===== DELIVERY TYPE ===== */
@@ -622,23 +613,11 @@ body::after {
   transition: var(--transition);
 }
 
-.btn-edit {
-  background: var(--lavender);
-  color: #7c3aed;
-}
-.btn-edit:hover {
-  background: #ede9fe;
-  transform: scale(1.1);
-}
+.btn-edit   { background: var(--lavender); color: #7c3aed; }
+.btn-edit:hover  { background: #ede9fe; transform: scale(1.1); }
 
-.btn-delete {
-  background: #fff0f0;
-  color: #dc2626;
-}
-.btn-delete:hover {
-  background: #fee2e2;
-  transform: scale(1.1);
-}
+.btn-delete { background: #fff0f0; color: #dc2626; }
+.btn-delete:hover { background: #fee2e2; transform: scale(1.1); }
 
 .btn-status {
   background: var(--rose-medium);
@@ -649,10 +628,7 @@ body::after {
   font-size: 12px;
   font-weight: 600;
 }
-.btn-status:hover {
-  background: var(--pink-100);
-  transform: scale(1.03);
-}
+.btn-status:hover { background: var(--pink-100); transform: scale(1.03); }
 
 /* ===== EMPTY STATE ===== */
 .empty-state {
@@ -731,6 +707,9 @@ body::after {
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
   opacity: 0;
   overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-overlay.open .modal {
@@ -745,6 +724,7 @@ body::after {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1.5px solid var(--border-light);
+  flex-shrink: 0;
 }
 
 .modal-title {
@@ -769,6 +749,7 @@ body::after {
   font-size: 18px;
   color: var(--text-medium);
   transition: var(--transition);
+  flex-shrink: 0;
 }
 
 .btn-modal-close:hover {
@@ -779,6 +760,8 @@ body::after {
 
 .modal-body {
   padding: 28px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 /* ===== FORM ===== */
@@ -787,14 +770,13 @@ body::after {
 }
 
 .form-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-medium);
   margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .form-input,
@@ -846,6 +828,7 @@ body::after {
   gap: 12px;
   justify-content: flex-end;
   background: var(--surface-2);
+  flex-shrink: 0;
 }
 
 .btn-cancel {
@@ -903,6 +886,7 @@ body::after {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-width: calc(100vw - 48px);
 }
 
 .toast {
@@ -926,9 +910,7 @@ body::after {
 
 .toast-icon { font-size: 20px; }
 
-.toast-content {
-  flex: 1;
-}
+.toast-content { flex: 1; }
 
 .toast-title {
   font-weight: 700;
@@ -1001,7 +983,7 @@ body::after {
   transform: scale(1);
 }
 
-.confirm-icon { font-size: 40px; margin-bottom: 16px; }
+.confirm-icon  { font-size: 40px; margin-bottom: 16px; }
 .confirm-title { font-family: 'Itim', cursive; font-size: 20px; margin-bottom: 8px; color: var(--text-dark); }
 .confirm-text  { font-size: 14px; color: var(--text-medium); margin-bottom: 24px; }
 
@@ -1225,42 +1207,14 @@ tbody tr {
   font-weight: 600;
 }
 
-/* สี แต่ละ section */
-.section-queue .section-header-content {
-  background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
-  color: #0369a1;
-}
-.section-queue .section-header-count {
-  background: #bae6fd;
-  color: #0369a1;
-}
-
-.section-design .section-header-content {
-  background: linear-gradient(135deg, #fce4ec, #fff0f5);
-  color: var(--pink-600);
-}
-.section-design .section-header-count {
-  background: var(--pink-100);
-  color: var(--pink-600);
-}
-
-.section-print .section-header-content {
-  background: linear-gradient(135deg, #fff3e0, #fffbf0);
-  color: #c2410c;
-}
-.section-print .section-header-count {
-  background: #fed7aa;
-  color: #c2410c;
-}
-
-.section-done .section-header-content {
-  background: linear-gradient(135deg, #e8f5e9, #f0fdf4);
-  color: #166534;
-}
-.section-done .section-header-count {
-  background: #bbf7d0;
-  color: #166534;
-}
+.section-queue .section-header-content  { background: linear-gradient(135deg, #e0f2fe, #f0f9ff); color: #0369a1; }
+.section-queue .section-header-count    { background: #bae6fd; color: #0369a1; }
+.section-design .section-header-content { background: linear-gradient(135deg, #fce4ec, #fff0f5); color: var(--pink-600); }
+.section-design .section-header-count   { background: var(--pink-100); color: var(--pink-600); }
+.section-print .section-header-content  { background: linear-gradient(135deg, #fff3e0, #fffbf0); color: #c2410c; }
+.section-print .section-header-count    { background: #fed7aa; color: #c2410c; }
+.section-done .section-header-content   { background: linear-gradient(135deg, #e8f5e9, #f0fdf4); color: #166534; }
+.section-done .section-header-count     { background: #bbf7d0; color: #166534; }
 
 /* ===== DUE DATE TAG ===== */
 .due-tag {
@@ -1287,74 +1241,302 @@ tbody tr {
   margin-top: 32px;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1200px) {
+/* =============================================================
+   RESPONSIVE — ปรับตามขนาดหน้าจอ
+   ============================================================= */
+
+/* --- Desktop ใหญ่ (1400px+) --- */
+@media (min-width: 1400px) {
+  .main-content {
+    padding: 32px 48px;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+/* --- Desktop กลาง (1200px–1399px) --- */
+@media (max-width: 1399px) and (min-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
-@media (max-width: 900px) {
+/* --- Tablet Landscape (900px–1199px) --- */
+@media (max-width: 1199px) and (min-width: 900px) {
+  .main-content {
+    padding: 24px 24px;
+  }
   .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .monthly-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  /* ซ่อนคอลัมน์หมายเหตุ */
+  .data-table thead th:nth-child(8),
+  .data-table tbody td:nth-child(8) {
+    display: none;
   }
 }
 
-@media (max-width: 768px) {
+/* --- Tablet Portrait (768px–899px) --- */
+@media (max-width: 899px) and (min-width: 768px) {
+  .main-content {
+    padding: 20px 20px;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .stat-card {
+    padding: 14px 10px;
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .stat-number {
+    font-size: 22px;
+  }
+  .toolbar {
+    flex-wrap: wrap;
+  }
+  .filter-group {
+    overflow-x: auto;
+    flex-shrink: 0;
+  }
+  .monthly-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  /* ซ่อนคอลัมน์ที่ไม่จำเป็น */
+  .data-table thead th:nth-child(8),
+  .data-table tbody td:nth-child(8) {
+    display: none;
+  }
+  .data-table thead th:nth-child(4),
+  .data-table tbody td:nth-child(4) {
+    display: none;
+  }
+}
+
+/* --- Mobile (max-width: 767px) --- */
+@media (max-width: 767px) {
+  /* Header */
   .header {
     padding: 0 16px;
-    height: 60px;
+    height: 58px;
+  }
+  .header-title {
+    font-size: 17px;
+  }
+  .header-subtitle {
+    display: none;
+  }
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
+  .sync-indicator span {
+    display: none;
+  }
+  .sync-indicator {
+    padding: 6px 10px;
   }
 
-  .header-subtitle { display: none; }
-
+  /* Main */
   .main-content {
-    padding: 20px 16px;
+    padding: 16px 14px;
   }
 
+  /* Stats grid — 2 คอลัมน์บน mobile */
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 10px;
   }
-
   .stat-card {
-    padding: 14px 12px;
+    padding: 14px 10px;
+    gap: 8px;
+  }
+  .stat-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    border-radius: var(--radius-sm);
+  }
+  .stat-number {
+    font-size: 22px;
+  }
+  /* stat card รายได้ — font เล็กลงให้พอดี */
+  #statEarned,
+  #statExpected {
+    font-size: 15px !important;
+  }
+  .stat-label {
+    font-size: 11px;
   }
 
-  .stat-number { font-size: 24px; }
-  .stat-label { font-size: 11px; }
-
+  /* Toolbar */
   .toolbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
-
+  .search-box {
+    min-width: unset;
+  }
   .filter-group {
     overflow-x: auto;
-    padding: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-
-  .data-table thead th:nth-child(3),
-  .data-table tbody td:nth-child(3) {
+  .filter-group::-webkit-scrollbar {
     display: none;
   }
-
-  .sync-indicator span { display: none; }
-
-  .monthly-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .filter-btn {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+  .btn-add {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+  .btn-refresh {
+    align-self: flex-end;
   }
 
+  /* Table — ซ่อนคอลัมน์ไม่จำเป็น */
+  .data-table thead th:nth-child(4),
+  .data-table tbody td:nth-child(4),
+  .data-table thead th:nth-child(7),
+  .data-table tbody td:nth-child(7),
+  .data-table thead th:nth-child(8),
+  .data-table tbody td:nth-child(8) {
+    display: none;
+  }
+  .data-table thead th,
+  .data-table tbody td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  .badge::before {
+    display: none;
+  }
+  .action-group {
+    gap: 4px;
+  }
+  .btn-action {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  .btn-status {
+    padding: 0 6px;
+    font-size: 11px;
+  }
+  .table-header {
+    padding: 14px 16px;
+  }
+
+  /* Monthly grid — 1 คอลัมน์บน mobile เล็ก */
+  .monthly-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .month-card {
+    padding: 14px;
+  }
+  .month-stat-num {
+    font-size: 17px;
+  }
+
+  /* Modal — ขึ้นจากด้านล่าง */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-width: 100%;
+    max-height: 92vh;
+    transform: translateY(100%);
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0);
+  }
+  .modal-header {
+    padding: 20px 20px 16px;
+  }
+  .modal-body {
+    padding: 20px;
+  }
+  .modal-footer {
+    padding: 16px 20px;
+  }
   .form-row {
     grid-template-columns: 1fr;
   }
+  .btn-cancel,
+  .btn-save {
+    flex: 1;
+    justify-content: center;
+  }
 
-  .modal { margin: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-  .modal-overlay { align-items: flex-end; padding: 0; }
+  /* Toast */
+  .toast-container {
+    top: auto;
+    bottom: 20px;
+    right: 14px;
+    left: 14px;
+  }
+  .toast {
+    min-width: unset;
+    max-width: 100%;
+  }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-  .monthly-grid { grid-template-columns: 1fr 1fr; }
+  /* Confirm box */
+  .confirm-box {
+    padding: 24px 20px;
+  }
+}
+
+/* --- Mobile เล็ก (max-width: 480px) --- */
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .monthly-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .month-card {
+    padding: 12px;
+  }
+  .month-name {
+    font-size: 14px;
+  }
+  .month-stat-num {
+    font-size: 15px;
+  }
+  /* ซ่อนคอลัมน์จำนวนสินค้าด้วยบนหน้าจอเล็กมาก */
+  .data-table thead th:nth-child(5),
+  .data-table tbody td:nth-child(5) {
+    display: none;
+  }
+  .section-header-label {
+    font-size: 12px;
+  }
 }
