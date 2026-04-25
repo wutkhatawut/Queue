@@ -259,7 +259,7 @@ function renderMonthly() {
     const monthName = MONTH_NAMES_TH[idx];
     const hasData   = data.orders > 0;
     return `
-      <div class="month-card ${hasData ? 'has-data' : ''}">
+      <div class="month-card ${hasData ? 'has-data' : ''}" onclick="openMonthModal('${key}', '${monthName}')">
         <div class="month-name">${monthName}</div>
         <div class="month-year">${selectedYear}</div>
         <div class="month-stats">
@@ -286,6 +286,7 @@ function renderMonthly() {
           </div>
         </div>
         <div class="month-orders">${data.orders} ออเดอร์</div>
+        <div class="month-view-btn">👆 คลิกดูรายละเอียด</div>
       </div>`;
   }).join('');
 
@@ -541,10 +542,148 @@ function removeToast(id) {
 }
 
 /* =====================================================
+   MONTH DETAIL MODAL
+   ===================================================== */
+let monthModalFilter = 'all';
+let monthModalKey    = '';
+
+function openMonthModal(key, monthName) {
+  monthModalKey    = key;
+  monthModalFilter = 'all';
+
+  const [year, mon] = key.split('-');
+  const thYear = Number(year) + 543;
+
+  document.getElementById('monthModalIcon').textContent  = '📅';
+  document.getElementById('monthModalTitle').textContent = `${monthName} ${thYear}`;
+  document.getElementById('monthModalOverlay').classList.add('open');
+  renderMonthModal();
+}
+
+function closeMonthModal() {
+  document.getElementById('monthModalOverlay').classList.remove('open');
+}
+
+function handleMonthOverlayClick(e) {
+  if (e.target === document.getElementById('monthModalOverlay')) closeMonthModal();
+}
+
+function getMonthRows() {
+  return allData.filter(row => {
+    if (!row.createdAt) return false;
+    const d = new Date(row.createdAt);
+    if (isNaN(d)) return false;
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    return k === monthModalKey;
+  });
+}
+
+function renderMonthModal() {
+  const rows = getMonthRows();
+
+  // Summary chips
+  const totalOrders  = rows.length;
+  const totalItems   = rows.reduce((s, r) => s + (Number(r.qty)   || 0), 0);
+  const totalEarned  = rows.filter(r => r.status === 'จัดส่งเสร็จเรียบร้อย').reduce((s, r) => s + (Number(r.price) || 0), 0);
+  const totalExpect  = rows.filter(r => r.status !== 'จัดส่งเสร็จเรียบร้อย').reduce((s, r) => s + (Number(r.price) || 0), 0);
+
+  document.getElementById('monthModalSummary').innerHTML = `
+    <div class="month-summary-chip"><span>🛒</span><span class="chip-val">${totalOrders}</span><span>ออเดอร์</span></div>
+    <div class="month-summary-chip"><span>📦</span><span class="chip-val">${totalItems.toLocaleString('th-TH')}</span><span>ชิ้น</span></div>
+    <div class="month-summary-chip"><span>⏳</span><span class="chip-val">฿${totalExpect.toLocaleString('th-TH')}</span><span>รอรับ</span></div>
+    <div class="month-summary-chip"><span>💰</span><span class="chip-val">฿${totalEarned.toLocaleString('th-TH')}</span><span>รายได้จริง</span></div>
+  `;
+
+  // Count per status
+  const statusCounts = {};
+  STATUS_SECTIONS.forEach(s => {
+    statusCounts[s.key] = rows.filter(r => r.status === s.key).length;
+  });
+
+  // Tabs
+  const tabs = [
+    { key: 'all', icon: '📋', label: 'ทั้งหมด', count: rows.length },
+    ...STATUS_SECTIONS.map(s => ({ key: s.key, icon: s.icon, label: s.icon + ' ' + s.key.replace('เรียบร้อย','').trim(), count: statusCounts[s.key] }))
+  ];
+
+  document.getElementById('monthModalTabs').innerHTML = tabs.map(t => `
+    <button class="month-tab-btn ${monthModalFilter === t.key ? 'active' : ''}"
+            onclick="setMonthFilter('${t.key}')">
+      ${t.label} <span class="tab-count">${t.count}</span>
+    </button>`).join('');
+
+  // Filter rows
+  const filtered = monthModalFilter === 'all'
+    ? rows
+    : rows.filter(r => r.status === monthModalFilter);
+
+  document.getElementById('monthModalCount').textContent = filtered.length + ' รายการ';
+
+  // Table body
+  const tbody = document.getElementById('monthModalBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9">
+      <div class="month-empty">
+        <div class="month-empty-icon">🌸</div>
+        <div class="month-empty-text">ไม่มีออเดอร์ในหมวดนี้</div>
+      </div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((row, i) => {
+    const dueDateValue = row.dueDate || row.due_date || row.duedate || row.DueDate || '';
+    const dueLabel = dueDateValue
+      ? `<span class="due-tag">📅 ${esc(dueDateValue)}</span>`
+      : '<span style="color:var(--text-muted);font-size:12px">—</span>';
+    return `
+      <tr>
+        <td><span class="queue-number">#${i+1}</span></td>
+        <td><div class="customer-name">${esc(row.name || '—')}</div></td>
+        <td>${renderBadge(row.status)}</td>
+        <td><span class="delivery-tag">${deliveryIcon(row.delivery)} ${esc(row.delivery || '—')}</span></td>
+        <td style="text-align:center;font-weight:600;color:var(--text-dark)">${row.qty ? Number(row.qty).toLocaleString('th-TH') + ' ชิ้น' : '—'}</td>
+        <td style="text-align:right;font-weight:600;color:var(--pink-600)">${row.price ? '฿' + Number(row.price).toLocaleString('th-TH', {minimumFractionDigits:2}) : '—'}</td>
+        <td>${dueLabel}</td>
+        <td style="font-size:13px;color:var(--text-medium);max-width:140px;">${esc(row.note || '—')}</td>
+        <td>
+          <div class="action-group" style="justify-content:center">
+            <button class="btn-action btn-edit"   onclick="closeMonthModal(); openEditModal(${row.rowIndex})" title="แก้ไข">✏️</button>
+            <button class="btn-action btn-status" onclick="cycleStatusFromMonth(${row.rowIndex})" title="เปลี่ยนสถานะ">🔄</button>
+            <button class="btn-action btn-delete" onclick="closeMonthModal(); confirmDelete(${row.rowIndex})" title="ลบ">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function setMonthFilter(key) {
+  monthModalFilter = key;
+  renderMonthModal();
+}
+
+async function cycleStatusFromMonth(rowIndex) {
+  const row = allData.find(r => r.rowIndex === rowIndex);
+  if (!row) return;
+  const order = ['รับคิวเรียบร้อย', 'ออกแบบเสร็จเรียบร้อย', 'อัดรูปเสร็จเรียบร้อย', 'จัดส่งเสร็จเรียบร้อย'];
+  const next  = order[(order.indexOf(row.status) + 1) % order.length];
+  row.status  = next;
+  renderMonthModal();
+  renderTable();
+  updateStats();
+  try {
+    const params = { action: 'update', rowIndex, ...row };
+    await fetch(`${API_URL}?${toQuery(params)}`, { cache: 'no-store' });
+    showToast('success', '🔄 อัปเดตสถานะ', `เปลี่ยนเป็น "${next}" เรียบร้อย`);
+  } catch (err) {
+    showToast('error', '❌ อัปเดตล้มเหลว', err.message);
+  }
+}
+
+/* =====================================================
    KEYBOARD SHORTCUTS
    ===================================================== */
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+  if (e.key === 'Escape') { closeModal(); closeConfirm(); closeMonthModal(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     if (document.getElementById('modalOverlay').classList.contains('open')) saveCustomer();
   }
