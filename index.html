@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Itim&display=swap" rel="stylesheet" />
 </head>
 <body>
-
+  
 <div class="app-wrapper">
 
   <!-- ===== HEADER ===== -->
@@ -270,6 +270,52 @@
     <div class="confirm-actions">
       <button class="btn-confirm-cancel" onclick="closeConfirm()">ยกเลิก</button>
       <button class="btn-confirm-delete" id="btnConfirmDelete" onclick="executeDelete()">ลบเลย</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MONTH DETAIL MODAL ===== -->
+<div class="modal-overlay" id="monthModalOverlay" onclick="handleMonthOverlayClick(event)">
+  <div class="modal month-modal" id="monthModal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span id="monthModalIcon">📅</span>
+        <span id="monthModalTitle">รายละเอียดเดือน</span>
+      </div>
+      <button class="btn-modal-close" onclick="closeMonthModal()">✕</button>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="month-modal-summary" id="monthModalSummary"></div>
+
+    <!-- Filter Tabs -->
+    <div class="month-modal-tabs" id="monthModalTabs"></div>
+
+    <!-- Body -->
+    <div class="month-modal-body">
+      <div class="month-modal-table-wrap">
+        <table class="data-table month-detail-table">
+          <thead>
+            <tr>
+              <th style="width:44px">#</th>
+              <th>ชื่อ - iG ลูกค้า</th>
+              <th>สถานะ</th>
+              <th>ประเภทส่ง</th>
+              <th style="text-align:center">จำนวน</th>
+              <th style="text-align:right">ราคา</th>
+              <th>กำหนดส่ง</th>
+              <th>หมายเหตุ</th>
+              <th style="width:110px;text-align:center">ดำเนินการ</th>
+            </tr>
+          </thead>
+          <tbody id="monthModalBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="modal-footer month-modal-footer">
+      <span class="month-modal-count" id="monthModalCount">0 รายการ</span>
+      <button class="btn-cancel" onclick="closeMonthModal()">ปิด</button>
     </div>
   </div>
 </div>
