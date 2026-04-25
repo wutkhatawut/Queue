@@ -351,6 +351,36 @@ function refreshData() {
 }
 
 /* =====================================================
+   SCROLL LOCK — ป้องกัน body เลื่อนเมื่อ Modal เปิด
+   ===================================================== */
+let _scrollLockCount = 0;
+let _scrollY = 0;
+
+function lockBodyScroll() {
+  if (_scrollLockCount === 0) {
+    _scrollY = window.scrollY;
+    document.body.style.position   = 'fixed';
+    document.body.style.top        = `-${_scrollY}px`;
+    document.body.style.left       = '0';
+    document.body.style.right      = '0';
+    document.body.style.overflowY  = 'scroll';
+  }
+  _scrollLockCount++;
+}
+
+function unlockBodyScroll() {
+  _scrollLockCount = Math.max(0, _scrollLockCount - 1);
+  if (_scrollLockCount === 0) {
+    document.body.style.position  = '';
+    document.body.style.top       = '';
+    document.body.style.left      = '';
+    document.body.style.right     = '';
+    document.body.style.overflowY = '';
+    window.scrollTo({ top: _scrollY, behavior: 'instant' });
+  }
+}
+
+/* =====================================================
    MODAL — OPEN (เพิ่ม)
    ===================================================== */
 function openModal() {
@@ -366,6 +396,7 @@ function openModal() {
   document.getElementById('fieldDueDate').value       = '';
   document.getElementById('fieldNote').value          = '';
   document.getElementById('modalOverlay').classList.add('open');
+  lockBodyScroll();
   setTimeout(() => document.getElementById('fieldName').focus(), 300);
 }
 
@@ -389,11 +420,13 @@ function openEditModal(rowIndex) {
   document.getElementById('fieldDueDate').value       = dueDateValue; // ✅ normalized
   document.getElementById('fieldNote').value          = row.note     || '';
   document.getElementById('modalOverlay').classList.add('open');
+  lockBodyScroll();
 }
 
 /* ===== MODAL — CLOSE ===== */
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
+  unlockBodyScroll();
 }
 
 function handleOverlayClick(e) {
@@ -473,11 +506,13 @@ async function cycleStatus(rowIndex) {
 function confirmDelete(rowIndex) {
   deleteTarget = rowIndex;
   document.getElementById('confirmOverlay').classList.add('open');
+  lockBodyScroll();
 }
 
 function closeConfirm() {
   deleteTarget = null;
   document.getElementById('confirmOverlay').classList.remove('open');
+  unlockBodyScroll();
 }
 
 async function executeDelete() {
@@ -557,11 +592,13 @@ function openMonthModal(key, monthName) {
   document.getElementById('monthModalIcon').textContent  = '📅';
   document.getElementById('monthModalTitle').textContent = `${monthName} ${thYear}`;
   document.getElementById('monthModalOverlay').classList.add('open');
+  lockBodyScroll();
   renderMonthModal();
 }
 
 function closeMonthModal() {
   document.getElementById('monthModalOverlay').classList.remove('open');
+  unlockBodyScroll();
 }
 
 function handleMonthOverlayClick(e) {
