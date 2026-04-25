@@ -1261,6 +1261,161 @@ tbody tr {
   white-space: nowrap;
 }
 
+/* ===== MONTH DETAIL MODAL ===== */
+.month-modal {
+  max-width: 900px;
+  width: 95vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.month-modal-summary {
+  display: flex;
+  gap: 12px;
+  padding: 14px 28px;
+  background: var(--rose-light);
+  border-bottom: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.month-summary-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.month-summary-chip span:first-child { font-size: 16px; }
+
+.month-summary-chip .chip-val {
+  font-family: 'Itim', cursive;
+  font-size: 17px;
+  color: var(--pink-600);
+}
+
+.month-modal-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--border-light);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.month-modal-tabs::-webkit-scrollbar { display: none; }
+
+.month-tab-btn {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.month-tab-btn:hover {
+  background: var(--rose-medium);
+  border-color: var(--pink-200);
+}
+
+.month-tab-btn.active {
+  background: linear-gradient(135deg, var(--pink-400), var(--pink-600));
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(244, 91, 142, 0.35);
+}
+
+.month-tab-btn .tab-count {
+  background: rgba(0,0,0,0.1);
+  border-radius: 99px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.month-tab-btn.active .tab-count {
+  background: rgba(255,255,255,0.3);
+}
+
+.month-modal-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.month-modal-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.month-detail-table {
+  width: 100%;
+}
+
+.month-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.month-modal-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Month card clickable */
+.month-card {
+  cursor: pointer;
+}
+
+.month-card:hover {
+  border-color: var(--pink-300) !important;
+  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-3px) !important;
+}
+
+.month-card .month-view-btn {
+  display: none;
+  font-size: 11px;
+  color: var(--pink-500);
+  font-weight: 600;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.month-card:hover .month-view-btn {
+  display: block;
+}
+
+/* Empty state for month modal */
+.month-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+
+.month-empty-icon { font-size: 48px; margin-bottom: 10px; }
+.month-empty-text { font-size: 16px; color: var(--text-light); }
+
 /* ===== FOOTER ===== */
 .footer {
   text-align: center;
@@ -1520,6 +1675,23 @@ tbody tr {
   .btn-save {
     flex: 1;
     justify-content: center;
+  }
+
+  /* Month modal mobile */
+  .month-modal {
+    max-width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .month-modal-summary {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .month-summary-chip {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .month-modal-tabs {
+    padding: 10px 16px;
   }
 
   /* Toast */
